@@ -25,31 +25,20 @@ dependencies {
 
 还有一点需要注意的是当searchView展开以后Close时OnCloseListener不起作用。可以用一下方法：
 ```java
-public class ScrollingActivity extends MenuItemCompat.OnActionExpandListener 
-```
-先让Activity去实现 MenuItemCompat.OnActionExpandListener 
-然后Create SearchView如下：
-```java
- private void createSearchView(Menu menu) {
-        mSearchView = (SearchView) menu.findItem(R.id.search_menu).getActionView();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-            MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search_menu), this);
-        mSearchView.setOnQueryTextListener(this);
-        mSearchView.setIconifiedByDefault(false);
-        mSearchView.setQueryHint("输入您感兴趣的...");
-    }
-```
-监听相关你可以打印log查看：
-```java
- @Override
-    public boolean onMenuItemActionExpand(MenuItem item) {
-        Log.i(TAG, "onMenuItemActionExpand");
-        return false;
-    }
+MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search_menu), new  MenuItemCompat.OnActionExpandListener(){
 
-    @Override
-    public boolean onMenuItemActionCollapse(MenuItem item) {
-        Log.i(TAG, "onMenuItemActionCollapse");
-        return false;
-    }
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem item) {
+                    Log.i(TAG, "onMenuItemActionExpand");
+                    mFrameLayout.setVisibility(View.VISIBLE);
+                    return true;
+                }
+
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem item) {
+                    Log.i(TAG, "onMenuItemActionCollapse");
+                    mFrameLayout.setVisibility(View.GONE);
+                    return true;
+                }
+});
 ```
