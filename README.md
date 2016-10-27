@@ -21,7 +21,7 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.1.0'
 }
 ```
-有关de.hdodenhof:circleimageview可以在github中搜索circleimageview
+有关'de.hdodenhof:circleimageview'可以在github中查看[circleimageview](https://github.com/hdodenhof/CircleImageView)
 
 还有一点需要注意的是当searchView展开以后Close时OnCloseListener不起作用。可以用一下方法：
 ```java
