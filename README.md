@@ -30,14 +30,12 @@ MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search_menu), new  M
                 @Override
                 public boolean onMenuItemActionExpand(MenuItem item) {
                     Log.i(TAG, "onMenuItemActionExpand");
-                    mFrameLayout.setVisibility(View.VISIBLE);
                     return true;
                 }
 
                 @Override
                 public boolean onMenuItemActionCollapse(MenuItem item) {
                     Log.i(TAG, "onMenuItemActionCollapse");
-                    mFrameLayout.setVisibility(View.GONE);
                     return true;
                 }
 });
