@@ -8,6 +8,7 @@ import java.util.List;
  */
 public class DataModel {
     private static DataModel mDataModel = new DataModel();
+    private WebServiceHelper mWebServiceHelper;
     private List<String> queryDatas = new ArrayList<String>();
     private List<String> mDatas = new ArrayList<String>();
 
@@ -23,13 +24,14 @@ public class DataModel {
         for (int i = 'A'; i < 'z'; i++) {
             mDatas.add("" + (char) i);
         }
+
     }
 
     public List<String> searching(String query) {
         queryDatas.clear();
         if (query.isEmpty()) return mDatas;
         else for (String mData : mDatas)
-            if (mData.toLowerCase().equals(query.toLowerCase())) queryDatas.add(mData);
+            if (mData.toLowerCase().contains(query.toLowerCase())) queryDatas.add(mData);
         return queryDatas;
     }
 }

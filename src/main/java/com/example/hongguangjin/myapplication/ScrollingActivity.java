@@ -18,10 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class ScrollingActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, RecyclerDataAdapter.OnItemClickListener{
+public class ScrollingActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, RecyclerDataAdapter.OnItemClickListener {
     private static final String TAG = "ScrollingActivity";
     private SearchView mSearchView;
     private RecyclerView mRecyclerView;
@@ -78,7 +75,7 @@ public class ScrollingActivity extends AppCompatActivity implements SearchView.O
     private void createSearchView(Menu menu) {
         mSearchView = (SearchView) menu.findItem(R.id.search_menu).getActionView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-            MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search_menu), new  MenuItemCompat.OnActionExpandListener(){
+            MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search_menu), new MenuItemCompat.OnActionExpandListener() {
 
                 @Override
                 public boolean onMenuItemActionExpand(MenuItem item) {
@@ -93,7 +90,7 @@ public class ScrollingActivity extends AppCompatActivity implements SearchView.O
                     mFrameLayout.setVisibility(View.GONE);
                     return true;
                 }
-        });
+            });
         mSearchView.setOnQueryTextListener(this);
         mSearchView.setIconifiedByDefault(false);
         mSearchView.setQueryHint("输入您感兴趣的...");
@@ -109,6 +106,16 @@ public class ScrollingActivity extends AppCompatActivity implements SearchView.O
     @Override
     public void onStart() {
         super.onStart();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                WebServiceHelper mWebServiceHelper = new WebServiceHelper();
+//                List<String> provinces = mWebServiceHelper.getProvince();
+//                List<String> citys = mWebServiceHelper.getCitys("3113");
+                WeatherBean bean = mWebServiceHelper.getWeatherBytheCityCode("");
+            }
+        }
+        ).start();
     }
 
     @Override
@@ -124,5 +131,7 @@ public class ScrollingActivity extends AppCompatActivity implements SearchView.O
     }
 
     @Override
-    public void onStop() { super.onStop(); }
+    public void onStop() {
+        super.onStop();
+    }
 }

@@ -18,7 +18,9 @@ android {
         }
     }
 }
-
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/ksoap2-android-releases/' }
+}
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
@@ -28,4 +30,5 @@ dependencies {
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.caverock:androidsvg:1.2.1'
     compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile 'com.google.code.ksoap2-android:ksoap2-android:3.6.1'
 }
