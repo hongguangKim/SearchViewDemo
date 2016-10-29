@@ -3,6 +3,7 @@ package com.example.hongguangjin.myapplication;
 import android.util.Log;
 
 import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
@@ -22,7 +23,7 @@ public class WebServiceHelper {
     //WSDL文档中的命名空间
     private static final String targetNameSpace = "http://WebXml.com.cn/";
     //WSDL文档中的URL
-    private static final String WSDL = "http://ws.webxml.com.cn/WebServices/WeatherWS.asmx?wsdl";
+    private static final String WSDL = "http://ws.webxml.com.cn/WebServices/WeatherWS.asmx";
 
     //需要调用的方法名(获得本天气预报Web Services支持的洲、国内外省份和城市信息)
     private static final String getSupportProvince = "getRegionProvince";
@@ -41,7 +42,7 @@ public class WebServiceHelper {
         List<String> provinces = new ArrayList<String>();
         String str = "";
         SoapObject soapObject = new SoapObject(targetNameSpace, getSupportProvince);
-        soapObject.addProperty("parameter name", "value");//调用的方法参数与参数值（根据具体需要可选可不选）
+//        soapObject.addProperty("parameter name", "value");//调用的方法参数与参数值（根据具体需要可选可不选）
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.dotNet = true;
@@ -89,6 +90,11 @@ public class WebServiceHelper {
         try {
             httpTransport.call(targetNameSpace + getSupportCity, envelope);
             SoapObject result = (SoapObject) envelope.getResponse();
+//            same solution ...
+//            SoapObject result = (SoapObject) envelope.bodyIn;
+//            SoapObject results = (SoapObject) result.getProperty("getSupportCityStringResult");
+//            Log.i("ScrollingActivity", "getSupportCityStringResult="+results.getProperty(0));
+
             int count = result.getPropertyCount();
             for (int index = 0; index < count; index++) {
                 citys.add(result.getProperty(index).toString());
@@ -114,20 +120,26 @@ public class WebServiceHelper {
 
 //        WeatherBean bean=new WeatherBean();
 
-        SoapObject soapObject = new SoapObject(targetNameSpace, getWeatherbyCityByCode);
-        soapObject.addProperty("theCityCode", "120");//调用的方法参数与参数值（根据具体需要可选可不选）
-//        soapObject.addProperty("theUserID", "");//调用的方法参数与参数值（根据具体需要可选可不选）
-
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-        envelope.dotNet = true;
-        envelope.setOutputSoapObject(soapObject);
         HttpTransportSE httpTransport = new HttpTransportSE(WSDL);
         httpTransport.debug = true;
+
+        SoapObject soapObject = new SoapObject(targetNameSpace, getWeatherbyCityByCode);
+        PropertyInfo pi = new PropertyInfo();
+        pi.setName("theCityCode");
+        pi.setValue(code);
+        pi.setType(code.getClass());
+        soapObject.addProperty(pi);
+//        soapObject.addProperty("theCityCode", code);//调用的方法参数与参数值（根据具体需要可选可不选）
+//        soapObject.addProperty("theUserID", "");//调用的方法参数与参数值（根据具体需要可选可不选）
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.bodyOut = soapObject;
+        envelope.dotNet = true;
         try {
             httpTransport.call(targetNameSpace + getWeatherbyCityByCode, envelope);
-            SoapObject object = (SoapObject) envelope.bodyIn;
-            Log.i("ScrollingActivity", object.toString() + "");
-//           SoapObject object2 = (SoapObject)object.getProperty("getWeatherResponse");
+            SoapObject result = (SoapObject) envelope.bodyIn;
+            SoapObject results = (SoapObject) result.getProperty("getWeatherResult");
+            Log.i("ScrollingActivity", "getWeatherResult=" + results.getProperty(0));
+
             //下面对结果进行解析，结构类似json对象
 //            bean=parserWeather(result);
 
@@ -141,6 +153,16 @@ public class WebServiceHelper {
         return null;
     }
 
+    // 解析服务器响应的SOAP消息。
+    private static Map<String, String> parseProvinceOrCity(SoapObject detail) {
+        Map<String, String> result = new HashMap<String, String>();
+        for (int i = 0; i < detail.getPropertyCount(); i++) {
+            // 解析出每个省份
+            result.put(detail.getProperty(i).toString().split(",")[1], detail.getProperty(i).toString().split(",")[0]);
+        }
+        return result;
+    }
+
     /**
      * 解析返回的结果
      *
@@ -148,75 +170,38 @@ public class WebServiceHelper {
      */
     protected WeatherBean parserWeather(SoapObject soapObject) {
         WeatherBean bean = new WeatherBean();
-
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-
-
-        Map<String, Object> map = new HashMap<String, Object>();
-
         //城市名
         bean.setCityName(soapObject.getProperty(1).toString());
+        //更新时间
+        bean.setUpateWeatherTime(soapObject.getProperty(3).toString());
+        //今日天气
+        bean.setTodayWeather(soapObject.getProperty(4).toString());
+        //空气质量
+        bean.setTodayEnvironment(soapObject.getProperty(5).toString());
         //城市简介
-        bean.setCityDescription(soapObject.getProperty(soapObject.getPropertyCount() - 1).toString());
-        //天气实况+建议
-        bean.setLiveWeather(soapObject.getProperty(10).toString() + "\n" + soapObject.getProperty(11).toString());
+        bean.setCityDescription(soapObject.getProperty(6).toString());
 
-        //其他数据
-        //日期，
-        String date = soapObject.getProperty(6).toString();
-        //---------------------------------------------------
-        String weatherToday = "今天：" + date.split(" ")[0];
-        weatherToday += "\n天气：" + date.split(" ")[1];
-        weatherToday += "\n气温：" + soapObject.getProperty(5).toString();
-        weatherToday += "\n风力：" + soapObject.getProperty(7).toString();
-        weatherToday += "\n";
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        int length = soapObject.getPropertyCount();
+        Map<String, Object> map;
+        List<Integer> icons;
+        for (int i = 0; i < length; i = i + 5) {
+            map = new HashMap<String, Object>();
+            String date = soapObject.getProperty(7 + i).toString();
+            String weatherDay = "今天：" + date.split(" ")[0]; //日期
+            weatherDay += "\n天气：" + date.split(" ")[1];
+            weatherDay += "\n气温：" + soapObject.getProperty(8 + i).toString();
+            weatherDay += "\n风力：" + soapObject.getProperty(9 + i).toString();
+            weatherDay += "\n";
 
-        List<Integer> icons = new ArrayList<Integer>();
+            icons = new ArrayList<Integer>();
+            icons.add(parseIcon(soapObject.getProperty(10 + i).toString()));
+            icons.add(parseIcon(soapObject.getProperty(11 + i).toString()));
 
-        icons.add(parseIcon(soapObject.getProperty(8).toString()));
-        icons.add(parseIcon(soapObject.getProperty(9).toString()));
-
-        map.put("weatherDay", weatherToday);
-        map.put("icons", icons);
-        list.add(map);
-
-
-        //-------------------------------------------------
-        map = new HashMap<String, Object>();
-        date = soapObject.getProperty(13).toString();
-        String weatherTomorrow = "明天：" + date.split(" ")[0];
-        weatherTomorrow += "\n天气：" + date.split(" ")[1];
-        weatherTomorrow += "\n气温：" + soapObject.getProperty(12).toString();
-        weatherTomorrow += "\n风力：" + soapObject.getProperty(14).toString();
-        weatherTomorrow += "\n";
-
-        icons = new ArrayList<Integer>();
-
-        icons.add(parseIcon(soapObject.getProperty(15).toString()));
-        icons.add(parseIcon(soapObject.getProperty(16).toString()));
-
-        map.put("weatherDay", weatherTomorrow);
-        map.put("icons", icons);
-        list.add(map);
-        //--------------------------------------------------------------
-        map = new HashMap<String, Object>();
-
-        date = soapObject.getProperty(18).toString();
-        String weatherAfterTomorrow = "后天：" + date.split(" ")[0];
-        weatherAfterTomorrow += "\n天气：" + date.split(" ")[1];
-        weatherAfterTomorrow += "\n气温：" + soapObject.getProperty(17).toString();
-        weatherAfterTomorrow += "\n风力：" + soapObject.getProperty(19).toString();
-        weatherAfterTomorrow += "\n";
-
-        icons = new ArrayList<Integer>();
-        icons.add(parseIcon(soapObject.getProperty(20).toString()));
-        icons.add(parseIcon(soapObject.getProperty(21).toString()));
-
-        map.put("weatherDay", weatherAfterTomorrow);
-        map.put("icons", icons);
-        list.add(map);
-        //--------------------------------------------------------------
-
+            map.put("weatherDay", weatherDay);
+            map.put("icons", icons);
+            list.add(map);
+        }
         bean.setList(list);
         return bean;
     }

@@ -11,6 +11,9 @@ public class WeatherBean {
     private String liveWeather;
     private String cityDescription;
     private String cityName;
+    private String todayWeather;
+    private String upateWeatherTime;
+    private String todayEnvironment;
 
     public void setCityName(String cityName) {
         this.cityName = cityName;
@@ -19,6 +22,7 @@ public class WeatherBean {
     public void setCityDescription(String cityDescription) {
         this.cityDescription = cityDescription;
     }
+
     public void setLiveWeather(String liveWeather) {
         this.liveWeather = liveWeather;
     }
@@ -41,5 +45,29 @@ public class WeatherBean {
 
     public List<Map<String, Object>> getList() {
         return list;
+    }
+
+    public void setTodayWeather(String todayWeather) {
+        this.todayWeather = todayWeather;
+    }
+
+    public void setUpateWeatherTime(String upateWeatherTime) {
+        this.upateWeatherTime = upateWeatherTime;
+    }
+
+    public void setTodayEnvironment(String todayEnvironment) {
+        this.todayEnvironment = todayEnvironment;
+    }
+
+    public String getTodayWeather() {
+        return todayWeather;
+    }
+
+    public String getUpateWeatherTime() {
+        return upateWeatherTime;
+    }
+
+    public String getTodayEnvironment() {
+        return todayEnvironment;
     }
 }

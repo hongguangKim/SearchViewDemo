@@ -18,6 +18,8 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 public class ScrollingActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, RecyclerDataAdapter.OnItemClickListener {
     private static final String TAG = "ScrollingActivity";
     private SearchView mSearchView;
@@ -110,9 +112,9 @@ public class ScrollingActivity extends AppCompatActivity implements SearchView.O
             @Override
             public void run() {
                 WebServiceHelper mWebServiceHelper = new WebServiceHelper();
-//                List<String> provinces = mWebServiceHelper.getProvince();
-//                List<String> citys = mWebServiceHelper.getCitys("3113");
-                WeatherBean bean = mWebServiceHelper.getWeatherBytheCityCode("");
+                List<String> provinces = mWebServiceHelper.getProvince();
+                List<String> citys = mWebServiceHelper.getCitys("311101");
+                 mWebServiceHelper.getWeatherBytheCityCode("792");
             }
         }
         ).start();
